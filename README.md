@@ -8,7 +8,7 @@
 [![GitHub issues](https://img.shields.io/github/issues/devMuniz02/RAG-Any-File)](https://github.com/devMuniz02/RAG-Any-File/issues)
 [![GitHub stars](https://img.shields.io/github/stars/devMuniz02/RAG-Any-File)](https://github.com/devMuniz02/RAG-Any-File/stargazers)
 
-![Demo](assets/PDFRAG.gif)
+![Demo](assets/RAGAnyFile.gif)
 
 ## 📋 Table of Contents
 
