@@ -1,0 +1,2279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG Any File Chat</title>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --bg-color: #f8f9fa;
+            --text-color: #333;
+            --panel-bg: white;
+            --panel-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            --border-color: #ddd;
+            --accent-color: #667eea;
+            --accent-hover: #5a6fd8;
+            --success-bg: #d4edda;
+            --success-text: #155724;
+            --error-bg: #f8d7da;
+            --error-text: #721c24;
+            --info-bg: #d1ecf1;
+            --info-text: #0c5460;
+            --warning-bg: #fff3cd;
+            --warning-text: #856404;
+            --button-bg: #667eea;
+            --button-hover: #5a6fd8;
+            --button-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            --tab-bg: white;
+            --tab-active: #667eea;
+            --input-bg: white;
+            --input-border: #ddd;
+            --message-user-bg: #667eea;
+            --message-bot-bg: #f0f0f0;
+            --file-card-bg: white;
+            --file-card-hover: #f0f2ff;
+            --file-card-selected: #f0f2ff;
+        }
+
+        .dark-mode {
+            --bg-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            --bg-color: #1a1a1a;
+            --text-color: #ffffff;
+            --panel-bg: #2d2d2d;
+            --panel-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            --border-color: #555;
+            --accent-color: #87ceeb;
+            --accent-hover: #00bfff;
+            --success-bg: #2d5a2d;
+            --success-text: #a8e6a8;
+            --error-bg: #5a2d2d;
+            --error-text: #e6a8a8;
+            --info-bg: #2d5a5a;
+            --info-text: #a8e6e6;
+            --warning-bg: #5a5a2d;
+            --warning-text: #e6e6a8;
+            --button-bg: #87ceeb;
+            --button-hover: #00bfff;
+            --button-shadow: 0 4px 15px rgba(135, 206, 235, 0.4);
+            --tab-bg: #2d2d2d;
+            --tab-active: #87ceeb;
+            --input-bg: #3d3d3d;
+            --input-border: #555;
+            --message-user-bg: #187ba1;
+            --message-bot-bg: #3d3d3d;
+            --file-card-bg: #2d2d2d;
+            --file-card-hover: #3d3d3d;
+            --file-card-selected: #3d3d3d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            color: var(--text-color);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            font-size: 24px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .footer a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .footer a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        /* Tab styles */
+        .tab-container {
+            margin-top: 30px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            background: var(--tab-bg);
+            border-radius: 15px 15px 0 0;
+            box-shadow: var(--panel-shadow);
+            overflow: hidden;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 15px 20px;
+            background: var(--bg-color);
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--text-color);
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tab-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .tab-button:hover::before {
+            left: 100%;
+        }
+
+        .tab-button:hover {
+            background: var(--bg-color);
+            color: var(--accent-color);
+        }
+
+        .tab-button.active {
+            background: var(--panel-bg);
+            color: var(--tab-active);
+            border-bottom-color: var(--tab-active);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .tab-content {
+            background: var(--panel-bg);
+            border-radius: 0 15px 15px 15px;
+            box-shadow: var(--panel-shadow);
+            min-height: 500px;
+        }
+
+        .tab-panel {
+            display: none;
+            padding: 25px;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        .setup-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: var(--panel-shadow);
+            transition: all 0.3s ease;
+        }
+
+        .panel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .panel h2 {
+            color: var(--text-color);
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border-color);
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: var(--panel-bg);
+        }
+
+        .upload-area:hover {
+            border-color: var(--accent-color);
+            background: var(--bg-color);
+            transform: scale(1.02);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--accent-color);
+            background: var(--bg-color);
+            box-shadow: inset 0 0 20px rgba(102, 126, 234, 0.1);
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .upload-button {
+            background: linear-gradient(135deg, var(--button-bg), var(--button-hover));
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            box-shadow: var(--button-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .upload-button:hover::before {
+            left: 100%;
+        }
+
+        .upload-button:hover {
+            background: linear-gradient(135deg, var(--button-hover), var(--accent-color));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .upload-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .upload-options {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .upload-option-btn {
+            background: linear-gradient(135deg, var(--bg-color), var(--panel-bg));
+            color: var(--text-color);
+            border: 2px solid var(--accent-color);
+            padding: 12px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-option-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .upload-option-btn:hover::before {
+            left: 100%;
+        }
+
+        .upload-option-btn:hover {
+            background: linear-gradient(135deg, var(--accent-color), var(--button-hover));
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .upload-option-btn.selected {
+            background: linear-gradient(135deg, var(--accent-color), var(--button-hover));
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .manage-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: var(--bg-color);
+            border-radius: 12px;
+            box-shadow: var(--panel-shadow);
+        }
+
+        .control-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            width: 100%;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .delete-btn {
+            background: linear-gradient(135deg, #dc3545, #c82333) !important;
+        }
+
+        .delete-btn:hover {
+            background: linear-gradient(135deg, #c82333, #a02622) !important;
+            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.6) !important;
+        }
+
+        @media (max-width: 768px) {
+            .control-buttons {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 10px;
+            }
+        }
+
+        .manage-btn {
+            padding: 10px 18px;
+            background: linear-gradient(135deg, var(--button-bg), var(--button-hover));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: var(--button-shadow);
+            position: relative;
+            overflow: hidden;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .manage-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .manage-btn:hover::before {
+            left: 100%;
+        }
+
+        .manage-btn:hover {
+            background: linear-gradient(135deg, var(--button-hover), var(--accent-color));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .manage-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .file-count {
+            font-weight: bold;
+            color: var(--text-color);
+            text-align: center;
+            padding: 12px 20px;
+            background: var(--panel-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .file-card {
+            background: var(--file-card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .file-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.05), transparent);
+            transition: left 0.5s;
+        }
+
+        .file-card:hover::before {
+            left: 100%;
+        }
+
+        .file-card:hover {
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+
+        .file-card.selected {
+            border-color: var(--accent-color);
+            background: var(--file-card-selected);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .file-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .remove-btn {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+        }
+
+        .remove-btn:hover {
+            background: linear-gradient(135deg, #c82333, #a02622);
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.5);
+        }
+
+        .file-name {
+            font-weight: bold;
+            font-size: 14px;
+            color: var(--text-color);
+            word-break: break-all;
+        }
+
+        .file-checkbox {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--accent-color);
+        }
+
+        .file-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+
+        .file-info-item {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .file-info-label {
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+
+        .file-info-value {
+            color: var(--text-color);
+            font-weight: bold;
+        }
+
+        .file-status {
+            display: flex;
+            gap: 5px;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .status-selected {
+            background: var(--success-bg);
+            color: var(--success-text);
+        }
+
+        .status-not-selected {
+            background: var(--error-bg);
+            color: var(--error-text);
+        }
+
+        .status-embedded {
+            background: var(--info-bg);
+            color: var(--info-text);
+        }
+
+        .status-not-embedded {
+            background: var(--warning-bg);
+            color: var(--warning-text);
+        }
+
+        .status-visual {
+            background: linear-gradient(135deg, #9c27b0, #ba68c8);
+            color: white;
+        }
+
+        .status-no-visual {
+            background: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .page-btn {
+            padding: 10px 14px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: var(--panel-bg);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .page-btn.active {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .message-sources {
+            margin-top: 10px;
+            padding: 10px;
+            background: var(--bg-color);
+            border-radius: 5px;
+            font-size: 12px;
+        }
+
+        .message-sources h4 {
+            margin: 0 0 8px 0;
+            color: var(--text-color);
+            font-size: 13px;
+        }
+
+        .source-item {
+            margin-bottom: 4px;
+        }
+
+        .source-link {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: bold;
+            display: block;
+            transition: color 0.3s ease;
+        }
+
+        .source-link:visited {
+            color: var(--accent-color);
+        }
+
+        .source-link:hover {
+            color: var(--accent-hover);
+            text-decoration: underline;
+        }
+
+        .source-link.disabled {
+            color: var(--text-color);
+            opacity: 0.5;
+            pointer-events: none;
+            text-decoration: line-through;
+        }
+
+        .file-list {
+            margin-top: 20px;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: var(--bg-color);
+            border-radius: 8px;
+            margin-bottom: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .file-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .config-section {
+            margin-bottom: 20px;
+        }
+
+        .config-section label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        .config-section input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            font-size: 14px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .config-section input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            outline: none;
+        }
+
+        .chat-container {
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: var(--panel-bg);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .message ul, .message ol {
+            margin-left: 20px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .message li {
+            margin-bottom: 5px;
+        }
+
+        .message code {
+            background: rgba(0,0,0,0.1);
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .message pre {
+            background: rgba(0,0,0,0.1);
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+
+        .message:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .message.user {
+            background: var(--message-user-bg);
+            color: white;
+            text-align: right;
+            margin-left: 50px;
+        }
+
+        .message.bot {
+            background: var(--message-bot-bg);
+            color: var(--text-color);
+            margin-right: 50px;
+        }
+
+        .message a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .message a:visited {
+            color: var(--accent-color);
+        }
+
+        .message a:hover {
+            color: var(--accent-hover);
+            text-decoration: underline;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 14px;
+            border: 1px solid var(--input-border);
+            border-radius: 25px;
+            font-size: 16px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .chat-input input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            outline: none;
+        }
+
+        .chat-input input:disabled {
+            background: var(--bg-color);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .chat-input button {
+            padding: 14px 28px;
+            background: linear-gradient(135deg, var(--button-bg), var(--button-hover));
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: var(--button-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chat-input button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .chat-input button:hover::before {
+            left: 100%;
+        }
+
+        .chat-input button:hover {
+            background: linear-gradient(135deg, var(--button-hover), var(--accent-color));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .chat-input button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .status {
+            margin-top: 15px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-weight: bold;
+        }
+
+        .status.success {
+            background: var(--success-bg);
+            color: var(--success-text);
+            border: 1px solid rgba(21, 87, 36, 0.2);
+        }
+
+        .status.error {
+            background: var(--error-bg);
+            color: var(--error-text);
+            border: 1px solid rgba(114, 28, 36, 0.2);
+        }
+
+        .status.info {
+            background: var(--info-bg);
+            color: var(--info-text);
+            border: 1px solid rgba(12, 84, 96, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            .setup-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📄 RAG Any File Chat</h1>
+            <p>Upload files, create embeddings, and chat with your documents using local LLMs</p>
+            <button class="theme-toggle" id="themeToggle" title="Toggle Dark Mode">🌙</button>
+        </div>
+
+        <div class="tab-container">
+            <div class="tab-buttons">
+                <button class="tab-button active" onclick="switchTab('setup')">📤 Upload</button>
+                <button class="tab-button" onclick="switchTab('manage')">📋 Manage</button>
+                <button class="tab-button" onclick="switchTab('chat')">💬 Chat</button>
+            </div>
+            <div class="tab-content">
+                <div id="setup-tab" class="tab-panel active">
+                    <div class="setup-content">
+                        <div class="panel">
+                            <h2>📤 Upload Files</h2>
+                            <div class="upload-area" id="uploadArea">
+                                <div>
+                                    <p>Drag & drop files here or choose upload method below</p>
+                                    <div style="font-size: 12px; color: #888; margin: 10px 0;">
+                                        <strong>Supported file types:</strong>
+                                        <div style="margin: 5px 0; padding-left: 0;">
+                                            <div><strong>Documents:</strong> .pdf, .docx, .pptx, .xlsx, .csv</div>
+                                            <div><strong>Images:</strong> .jpg, .png, .gif, .bmp, .tiff, .webp</div>
+                                            <div><strong>Code/Text:</strong> .py, .js, .ts, .java, .cpp, .c, .h, .cs, .php, .rb, .go, .txt, .md, .rst, .json, .yaml, .xml, .html, .css, .scss, .sql</div>
+                                        </div>
+                                    </div>
+                                    <div class="upload-options">
+                                        <button class="upload-option-btn" id="selectFilesBtn">📄 Select Files</button>
+                                        <button class="upload-option-btn" id="selectFolderBtn">📁 Select Folder</button>
+                                    </div>
+                                    <input type="file" id="fileInput" multiple accept=".pdf,.docx,.pptx,.xlsx,.csv,.jpg,.jpeg,.png,.gif,.bmp,.tiff,.webp,.py,.js,.ts,.java,.cpp,.c,.h,.cs,.php,.rb,.go,.txt,.md,.rst,.json,.yaml,.yml,.xml,.html,.css,.scss,.sql" style="display: none;">
+                                    <input type="file" id="folderInput" webkitdirectory multiple style="display: none;">
+                                    <div class="upload-buttons" id="uploadButtons" style="display: none;">
+                                        <button class="upload-button" id="uploadButton">📤 Upload & Process</button>
+                                        <button class="upload-button" id="uploadVisualButton">🖼️ Upload & Process + Visual</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="file-list" id="fileList"></div>
+                            <div class="status info" id="uploadStatus" style="display: none;"></div>
+                        </div>
+
+                        <div class="panel">
+                            <h2>⚙️ API Configuration</h2>
+                            <div class="config-section">
+                                <label for="apiUrl">API URL:</label>
+                                <input type="text" id="apiUrl" placeholder="http://localhost:1234/v1/chat/completions">
+                            </div>
+                            <div class="config-section">
+                                <label for="modelName">LLM Model Name:</label>
+                                <input type="text" id="modelName" placeholder="local-model">
+                            </div>
+                            <div class="config-section">
+                                <label for="vlmApiUrl">VLM API URL:</label>
+                                <input type="text" id="vlmApiUrl" placeholder="http://localhost:8000/v1/chat/completions">
+                            </div>
+                            <div class="config-section">
+                                <label for="vlmModelName">VLM Model Name:</label>
+                                <input type="text" id="vlmModelName" placeholder="local-vlm-model">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="manage-tab" class="tab-panel">
+                    <h2>📋 Manage Files</h2>
+                    <div class="manage-controls">
+                        <div class="control-buttons">
+                            <div class="button-group">
+                                <button class="manage-btn" id="reembedAllBtn">🔄 Reprocess All</button>
+                                <button class="manage-btn" id="reprocessAllVisualBtn">🖼️ Reprocess All + Visual</button>
+                            </div>
+                            <div class="button-group">
+                                <button class="manage-btn" id="selectAllBtn">✅ Select All</button>
+                                <button class="manage-btn" id="deselectAllBtn">❌ Deselect All</button>
+                            </div>
+                            <div class="button-group">
+                                <button class="manage-btn delete-btn" id="deleteSelectedBtn">🗑️ Delete Selected</button>
+                            </div>
+                        </div>
+                        <div class="file-count" id="fileCount">No files selected</div>
+                    </div>
+                    <div class="file-grid" id="fileGrid">
+                        <!-- Files will be displayed here -->
+                    </div>
+                    <div class="pagination" id="pagination">
+                        <!-- Pagination controls will be displayed here -->
+                    </div>
+                </div>
+
+                <div id="chat-tab" class="tab-panel">
+                    <h2>💬 Chat with Your Files</h2>
+                    <div style="margin-bottom: 15px; text-align: right;">
+                        <button id="clearChatBtn" class="manage-btn" style="font-size: 14px; padding: 8px 16px;">🗑️ Clear Chat History</button>
+                    </div>
+                    <div class="chat-container">
+                        <div class="chat-messages" id="chatMessages">
+                        </div>
+                        <div class="chat-input">
+                            <input type="text" id="messageInput" placeholder="Ask a question about your files..." disabled>
+                            <button id="sendButton" disabled>Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <a href="https://github.com/devMuniz02/">🐙 GitHub: devMuniz02</a>
+            <a href="https://www.linkedin.com/in/devmuniz">💼 LinkedIn: devmuniz</a>
+            <a href="https://huggingface.co/manu02">🤗 Hugging Face: manu02</a>
+            <a href="https://devmuniz02.github.io/">🌐 Portfolio: devmuniz02.github.io</a>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching functionality
+        function switchTab(tabName) {
+            // Hide all tab panels
+            const tabPanels = document.querySelectorAll('.tab-panel');
+            tabPanels.forEach(panel => panel.classList.remove('active'));
+
+            // Remove active class from all tab buttons
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => button.classList.remove('active'));
+
+            // Show selected tab panel and activate button
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+
+            // Update send button state when switching to chat tab
+            if (tabName === 'chat') {
+                updateSendButtonState();
+            }
+        }
+
+        let uploadedFiles = []; // Current session files (shown in upload tab)
+        let previousSessionFiles = []; // Files from previous sessions (shown in manage tab)
+        let fileStates = {}; // Track selected and embedded status for each file
+        let currentPage = 1;
+        let filesPerPage = 10;
+        let chatHistory = []; // Store chat messages
+
+        function generateFileId(file) {
+            // Create a unique ID using normalized file name and size to handle duplicate names
+            // Normalize filename to handle both individual files and folder uploads consistently
+            const normalizedName = file.name.split('/').pop() || file.name;
+            return `${normalizedName}_${file.size}_${file.lastModified}`;
+        }
+
+        function getSelectedFilePaths() {
+            const selectedPaths = [];
+            // Check both current session and previous session files
+            const allFiles = [...uploadedFiles, ...previousSessionFiles];
+            allFiles.forEach(file => {
+                const fileId = generateFileId(file);
+                if (fileStates[fileId] && fileStates[fileId].selected && fileStates[fileId].serverPath) {
+                    selectedPaths.push(fileStates[fileId].serverPath);
+                }
+            });
+            return selectedPaths;
+        }
+
+        function updateSendButtonState() {
+            const selected = getSelectedFilePaths();
+            sendButton.disabled = selected.length === 0;
+            messageInput.disabled = selected.length === 0;
+        }
+
+        function removeUploadedFile(fileId) {
+            // Find file in either current session or previous session files
+            let file = uploadedFiles.find(f => generateFileId(f) === fileId);
+            let isCurrentSession = true;
+            
+            if (!file) {
+                file = previousSessionFiles.find(f => generateFileId(f) === fileId);
+                isCurrentSession = false;
+            }
+            
+            if (!file || !fileStates[fileId] || !fileStates[fileId].serverPath) {
+                return;
+            }
+
+            if (confirm(`Are you sure you want to remove "${file.name}"? This will delete the file and its embeddings.`)) {
+                fetch('/remove_file', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        file_path: fileStates[fileId].serverPath
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        // Remove from local arrays
+                        if (isCurrentSession) {
+                            const index = uploadedFiles.findIndex(f => generateFileId(f) === fileId);
+                            if (index !== -1) {
+                                uploadedFiles.splice(index, 1);
+                            }
+                        } else {
+                            const index = previousSessionFiles.findIndex(f => generateFileId(f) === fileId);
+                            if (index !== -1) {
+                                previousSessionFiles.splice(index, 1);
+                            }
+                        }
+                        delete fileStates[fileId];
+                        
+                        updateFileList();
+                        updateManageTab();
+                        showStatus('File removed successfully', 'success');
+                        autoSaveUploadedFiles(); // Save after removal
+                        checkSourceLinks();
+                    } else {
+                        showStatus(data.error || 'Failed to remove file', 'error');
+                    }
+                })
+                .catch(error => {
+                    showStatus('Error removing file: ' + error.message, 'error');
+                });
+            }
+        }
+        let isProcessing = false;
+
+        // DOM elements
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const folderInput = document.getElementById('folderInput');
+        const selectFilesBtn = document.getElementById('selectFilesBtn');
+        const selectFolderBtn = document.getElementById('selectFolderBtn');
+        const uploadButtons = document.getElementById('uploadButtons');
+        const uploadButton = document.getElementById('uploadButton');
+        const uploadVisualButton = document.getElementById('uploadVisualButton');
+        const fileList = document.getElementById('fileList');
+        const uploadStatus = document.getElementById('uploadStatus');
+        const apiUrlInput = document.getElementById('apiUrl');
+        const modelNameInput = document.getElementById('modelName');
+        const vlmApiUrlInput = document.getElementById('vlmApiUrl');
+        const vlmModelNameInput = document.getElementById('vlmModelName');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const clearChatBtn = document.getElementById('clearChatBtn');
+        const chatMessages = document.getElementById('chatMessages');
+
+        // Manage tab elements
+        const reembedAllBtn = document.getElementById('reembedAllBtn');
+        const reprocessAllVisualBtn = document.getElementById('reprocessAllVisualBtn');
+        const selectAllBtn = document.getElementById('selectAllBtn');
+        const deselectAllBtn = document.getElementById('deselectAllBtn');
+        const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+        const fileGrid = document.getElementById('fileGrid');
+        const pagination = document.getElementById('pagination');
+        const fileCount = document.getElementById('fileCount');
+
+        // Theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+
+        // Load theme preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme !== 'light') {
+            body.classList.add('dark-mode');
+            themeToggle.textContent = '☀️';
+            themeToggle.title = 'Toggle Light Mode';
+        }
+
+        // Theme toggle functionality
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            const isDark = body.classList.contains('dark-mode');
+            themeToggle.textContent = isDark ? '☀️' : '🌙';
+            themeToggle.title = isDark ? 'Toggle Light Mode' : 'Toggle Dark Mode';
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
+
+        // Initialize default values
+        fetch('/get_config')
+            .then(response => response.json())
+            .then(config => {
+                apiUrlInput.value = config.default_api_url;
+                modelNameInput.value = config.default_model;
+                vlmApiUrlInput.value = config.default_vlm_api_url || 'http://localhost:8000/v1/chat/completions';
+                vlmModelNameInput.value = config.default_vlm_model || 'local-vlm-model';
+            });
+
+        // Upload option buttons
+        selectFilesBtn.addEventListener('click', () => {
+            selectFilesBtn.classList.add('selected');
+            selectFolderBtn.classList.remove('selected');
+            fileInput.click();
+        });
+
+        selectFolderBtn.addEventListener('click', () => {
+            selectFolderBtn.classList.add('selected');
+            selectFilesBtn.classList.remove('selected');
+            folderInput.click();
+        });
+
+        // Upload area events (for drag and drop)
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files);
+            handleFiles(files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            handleFiles(files);
+        });
+
+        folderInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            handleFolderFiles(files);
+        });
+
+        uploadButton.addEventListener('click', () => uploadFiles(false));
+        uploadVisualButton.addEventListener('click', () => uploadFiles(true));
+
+        // Manage tab event listeners
+        reembedAllBtn.addEventListener('click', reprocessAllFiles);
+        reprocessAllVisualBtn.addEventListener('click', reprocessAllVisualFiles);
+        selectAllBtn.addEventListener('click', selectAllFiles);
+        deselectAllBtn.addEventListener('click', deselectAllFiles);
+        deleteSelectedBtn.addEventListener('click', deleteSelectedFiles);
+
+        function isFileUnique(file, fileList) {
+            return !fileList.some(existing => 
+                existing.name === file.name && 
+                existing.size === file.size && 
+                existing.lastModified === file.lastModified
+            );
+        }
+
+        function handleFiles(files) {
+            const allowedExtensions = ['.pdf', '.docx', '.pptx', '.xlsx', '.csv', '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp', '.py', '.js', '.ts', '.java', '.cpp', '.c', '.h', '.cs', '.php', '.rb', '.go', '.txt', '.md', '.rst', '.json', '.yaml', '.yml', '.xml', '.html', '.css', '.scss', '.sql'];
+            const allowedFiles = files.filter(file => {
+                const extension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+                return allowedExtensions.includes(extension) || file.type.startsWith('image/');
+            });
+
+            if (allowedFiles.length === 0) {
+                showStatus('Please select supported file types only.', 'error');
+                return;
+            }
+
+            // Filter out duplicates within selection and against existing files
+            const uniqueFiles = allowedFiles.filter(file => 
+                isFileUnique(file, uploadedFiles) && isFileUnique(file, previousSessionFiles)
+            );
+
+            if (uniqueFiles.length === 0) {
+                showStatus('All selected files are already in the system.', 'info');
+                return;
+            }
+
+            // Limit to 10 most recent files
+            const limitedFiles = uniqueFiles.slice(0, 10);
+            uploadedFiles = limitedFiles;
+            initializeFileStates();
+            updateFileList();
+            updateManageTab();
+            uploadButtons.style.display = 'flex';
+            updateUploadButtonsVisibility();
+            
+            const message = uniqueFiles.length > 10 
+                ? `Selected ${limitedFiles.length} unique file(s) for upload (showing first 10 of ${uniqueFiles.length} unique).`
+                : `Selected ${uniqueFiles.length} unique file(s) for upload.`;
+            showStatus(message, 'success');
+
+            // Reset file input to allow selecting the same files again
+            fileInput.value = '';
+        }
+
+        function handleFolderFiles(allFiles) {
+            // Filter for supported files from the selected folder (not subfolders)
+            const allowedExtensions = ['.pdf', '.docx', '.pptx', '.xlsx', '.csv', '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp', '.py', '.js', '.ts', '.java', '.cpp', '.c', '.h', '.cs', '.php', '.rb', '.go', '.txt', '.md', '.rst', '.json', '.yaml', '.yml', '.xml', '.html', '.css', '.scss', '.sql'];
+            const allowedFiles = allFiles.filter(file => {
+                const extension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+                const isAllowed = allowedExtensions.includes(extension) || file.type.startsWith('image/');
+
+                // Check if file is directly in the selected folder (not in subfolders)
+                // webkitRelativePath format: "foldername/filename.pdf" for root files
+                // or "foldername/subfolder/filename.pdf" for files in subfolders
+                const relativePath = file.webkitRelativePath || '';
+                const pathParts = relativePath.split('/').filter(part => part.length > 0);
+                const isInRootFolder = pathParts.length === 2; // folder name + file name
+
+                return isAllowed && isInRootFolder;
+            });
+
+            if (allowedFiles.length === 0) {
+                showStatus('No supported files found directly in the selected folder (subfolders are not included).', 'error');
+                return;
+            }
+
+            // Filter out duplicates within selection and against existing files
+            const uniqueFiles = allowedFiles.filter(file => 
+                isFileUnique(file, uploadedFiles) && isFileUnique(file, previousSessionFiles)
+            );
+
+            if (uniqueFiles.length === 0) {
+                showStatus('All files in the selected folder are already in the system.', 'info');
+                return;
+            }
+
+            // Limit to 10 most recent files
+            const limitedFiles = uniqueFiles.slice(0, 10);
+            uploadedFiles = limitedFiles;
+            initializeFileStates();
+            updateFileList();
+            updateManageTab();
+            uploadButtons.style.display = 'flex';
+            updateUploadButtonsVisibility();
+            
+            const message = uniqueFiles.length > 10 
+                ? `Found ${limitedFiles.length} unique file(s) directly in the selected folder (showing first 10 of ${uniqueFiles.length} unique).`
+                : `Found ${uniqueFiles.length} unique file(s) directly in the selected folder.`;
+            showStatus(message, 'success');
+
+            // Reset folder input to allow selecting the same folder again
+            folderInput.value = '';
+        }
+
+        function updateUploadButtonsVisibility() {
+            // Check if there are any image files in the uploaded files
+            const hasImages = uploadedFiles.some(file => {
+                const extension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+                return ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp'].includes(extension);
+            });
+            
+            // Always show both buttons
+            uploadButtons.style.display = 'flex';
+            
+            // Visual button is always enabled
+            uploadVisualButton.disabled = false;
+            uploadVisualButton.style.opacity = '1';
+            
+            // Original button is disabled when there are images
+            uploadButton.disabled = hasImages;
+            uploadButton.style.opacity = hasImages ? '0.5' : '1';
+        }
+
+        function initializeFileStates() {
+            // Preserve existing states and only add new ones for files that don't have states
+            uploadedFiles.forEach((file, index) => {
+                const fileId = generateFileId(file);
+                if (!fileStates[fileId]) {
+                    fileStates[fileId] = {
+                        selected: true, // Default to selected
+                        embedded: false,
+                        has_visual_features: false,
+                        pages: 0, // Will be determined after processing
+                        index: index,
+                        serverPath: null
+                    };
+                }
+            });
+        }
+
+        function updateManageTab() {
+            updateFileCount();
+            renderFileGrid();
+            renderPagination();
+        }
+
+        function updateFileCount() {
+            const totalFiles = uploadedFiles.length + previousSessionFiles.length;
+            const selectedFiles = Object.values(fileStates).filter(state => state.selected).length;
+            const embeddedFiles = Object.values(fileStates).filter(state => state.embedded).length;
+            const visualFiles = Object.values(fileStates).filter(state => state.has_visual_features).length;
+
+            fileCount.textContent = `${totalFiles} files | ${selectedFiles} selected | ${embeddedFiles} embedded | ${visualFiles} visual`;
+        }
+
+        function renderFileGrid() {
+            // Combine current session files and previous session files
+            const allFiles = [...uploadedFiles, ...previousSessionFiles];
+            const startIndex = (currentPage - 1) * filesPerPage;
+            const endIndex = startIndex + filesPerPage;
+            const filesToShow = allFiles.slice(startIndex, endIndex);
+
+            fileGrid.innerHTML = '';
+
+            filesToShow.forEach(file => {
+                const fileId = generateFileId(file);
+                const state = fileStates[fileId] || {
+                    selected: false,
+                    embedded: false,
+                    pages: 0,
+                    serverPath: null
+                };
+                const fileCard = createFileCard(file, state, fileId);
+                fileGrid.appendChild(fileCard);
+            });
+        }
+
+        function createFileCard(file, state, fileId) {
+            const card = document.createElement('div');
+            card.className = `file-card ${state.selected ? 'selected' : ''}`;
+
+            // Add click handler to toggle selection when clicking the card
+            card.addEventListener('click', function(event) {
+                // Don't toggle if clicking on buttons or the checkbox
+                if (event.target.tagName === 'BUTTON' || event.target.tagName === 'INPUT') {
+                    return;
+                }
+                toggleFileSelection(fileId);
+            });
+
+            const displayName = file.name;
+
+            card.innerHTML = `
+                <div class="file-header">
+                    <div class="file-name" title="${displayName}">${displayName}</div>
+                    <div class="file-actions">
+                        <input type="checkbox" class="file-checkbox" ${state.selected ? 'checked' : ''}
+                               onchange="toggleFileSelection('${fileId}')" onclick="event.stopPropagation()">
+                        <button class="remove-btn" onclick="removeUploadedFile('${fileId}'); event.stopPropagation()" title="Remove file">🗑️</button>
+                    </div>
+                </div>
+                <div class="file-info">
+                    <div class="file-info-item">
+                        <span class="file-info-label">Size:</span>
+                        <span class="file-info-value">${(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                    </div>
+                    <div class="file-info-item">
+                        <span class="file-info-label">Pages:</span>
+                        <span class="file-info-value">${state.pages || 0}</span>
+                    </div>
+                </div>
+                <div class="file-status">
+                    <span class="status-badge ${state.selected ? 'status-selected' : 'status-not-selected'}">
+                        ${state.selected ? 'Selected' : 'Not Selected'}
+                    </span>
+                    <span class="status-badge ${state.embedded ? 'status-embedded' : 'status-not-embedded'}">
+                        ${state.embedded ? 'Embedded' : 'Not Embedded'}
+                    </span>
+                    <span class="status-badge ${state.has_visual_features ? 'status-visual' : 'status-no-visual'}">
+                        ${state.has_visual_features ? 'Visual' : 'No Visual'}
+                    </span>
+                </div>
+            `;
+
+            return card;
+        }
+
+        function renderPagination() {
+            const totalFiles = uploadedFiles.length + previousSessionFiles.length;
+            const totalPages = Math.ceil(totalFiles / filesPerPage);
+
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+
+            let paginationHTML = '';
+
+            // Previous button
+            paginationHTML += `<button class="page-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">← Prev</button>`;
+
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === currentPage) {
+                    paginationHTML += `<button class="page-btn active" disabled>${i}</button>`;
+                } else {
+                    paginationHTML += `<button class="page-btn" onclick="changePage(${i})">${i}</button>`;
+                }
+            }
+
+            // Next button
+            paginationHTML += `<button class="page-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">Next →</button>`;
+
+            pagination.innerHTML = paginationHTML;
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            renderFileGrid();
+            renderPagination();
+        }
+
+        function toggleFileSelection(fileId) {
+            fileStates[fileId].selected = !fileStates[fileId].selected;
+            updateManageTab();
+            updateSendButtonState();
+        }
+
+        function reprocessAllFiles() {
+            if (uploadedFiles.length === 0) {
+                showStatus('No files to reprocess.', 'error');
+                return;
+            }
+
+            embedFiles(uploadedFiles, 'Reprocessing all files...');
+        }
+
+        function reprocessAllVisualFiles() {
+            if (uploadedFiles.length === 0) {
+                showStatus('No files to reprocess with visual.', 'error');
+                return;
+            }
+
+            embedFiles(uploadedFiles, 'Reprocessing all files with visual...', true);
+        }
+
+        function deleteSelectedFiles() {
+            // Find selected files from both current session and previous session files
+            const selectedFromCurrent = uploadedFiles.filter(file => {
+                const fileId = generateFileId(file);
+                return fileStates[fileId].selected;
+            });
+            
+            const selectedFromPrevious = previousSessionFiles.filter(file => {
+                const fileId = generateFileId(file);
+                return fileStates[fileId].selected;
+            });
+            
+            const selectedFiles = [...selectedFromCurrent, ...selectedFromPrevious];
+
+            if (selectedFiles.length === 0) {
+                showStatus('No files selected for deletion.', 'error');
+                return;
+            }
+
+            if (!confirm(`Are you sure you want to delete ${selectedFiles.length} selected file(s)? This action cannot be undone.`)) {
+                return;
+            }
+
+            deleteSelectedBtn.disabled = true;
+            deleteSelectedBtn.textContent = 'Deleting...';
+            showStatus('Deleting selected files...', 'info');
+
+            const deletePromises = selectedFiles.map(file => {
+                const fileId = generateFileId(file);
+                const serverPath = fileStates[fileId].serverPath;
+
+                if (!serverPath) {
+                    // File not uploaded yet, just remove from local arrays
+                    return Promise.resolve();
+                }
+
+                return fetch('/remove_file', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        file_path: serverPath
+                    })
+                });
+            });
+
+            Promise.all(deletePromises)
+                .then(() => {
+                    // Remove files from local arrays
+                    selectedFiles.forEach(file => {
+                        const fileId = generateFileId(file);
+                        // Remove from current session files
+                        const currentIndex = uploadedFiles.findIndex(f => generateFileId(f) === fileId);
+                        if (currentIndex !== -1) {
+                            uploadedFiles.splice(currentIndex, 1);
+                        }
+                        // Remove from previous session files
+                        const previousIndex = previousSessionFiles.findIndex(f => generateFileId(f) === fileId);
+                        if (previousIndex !== -1) {
+                            previousSessionFiles.splice(previousIndex, 1);
+                        }
+                        delete fileStates[fileId];
+                    });
+
+                    updateFileList();
+                    updateManageTab();
+                    saveUploadedFiles();
+                    checkSourceLinks();
+
+                    showStatus(`Successfully deleted ${selectedFiles.length} file(s).`, 'success');
+                })
+                .catch(error => {
+                    console.error('Error deleting files:', error);
+                    showStatus('Error deleting some files. Please try again.', 'error');
+                })
+                .finally(() => {
+                    deleteSelectedBtn.disabled = false;
+                    deleteSelectedBtn.textContent = '🗑️ Delete Selected';
+                });
+        }
+
+        function embedFiles(files, message, useVLM = false) {
+            // Check for duplicates against previous session files and within current selection
+            const duplicateFiles = [];
+            const processedIds = new Set();
+            
+            const filesToEmbed = files.filter(file => {
+                const fileId = generateFileId(file);
+                
+                // Check if this file already exists in previous session files
+                const existsInPrevious = previousSessionFiles.some(prevFile => generateFileId(prevFile) === fileId);
+                
+                // Check if this file appears multiple times in the current selection
+                const isDuplicateInSelection = processedIds.has(fileId);
+                
+                if (existsInPrevious || isDuplicateInSelection) {
+                    duplicateFiles.push(file.name);
+                    return false;
+                }
+                
+                // Mark this file ID as processed
+                processedIds.add(fileId);
+                return true;
+            });
+
+            if (filesToEmbed.length === 0) {
+                showStatus('All selected files are already processed. No new files to embed.', 'info');
+                reembedAllBtn.disabled = false;
+                reprocessAllVisualBtn.disabled = false;
+                reembedAllBtn.textContent = '🔄 Reprocess All';
+                reprocessAllVisualBtn.textContent = '🖼️ Reprocess All + Visual';
+                return;
+            }
+
+            reembedAllBtn.disabled = true;
+            reprocessAllVisualBtn.disabled = true;
+
+            let statusMessage = message.replace('Embedding', `Embedding ${filesToEmbed.length} file(s)`);
+            if (duplicateFiles.length > 0) {
+                statusMessage += ` (${duplicateFiles.length} duplicate(s) skipped: ${duplicateFiles.join(', ')})`;
+            }
+            reembedAllBtn.textContent = statusMessage;
+            reprocessAllVisualBtn.textContent = statusMessage;
+
+            const formData = new FormData();
+            filesToEmbed.forEach(file => {
+                // Use only the filename, not the full path for folder uploads
+                const filename = file.name.split('/').pop() || file.name;
+                formData.append('files', file, filename);
+            });
+
+            // Add VLM options
+            formData.append('enable_vlm', useVLM);
+            if (useVLM) {
+                formData.append('vlm_api_url', vlmApiUrlInput.value);
+                formData.append('vlm_model', vlmModelNameInput.value);
+            }
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    showStatus(data.message, 'success');
+                    messageInput.disabled = false;
+                    sendButton.disabled = false;
+                    addMessage('Assistant', 'Files processed successfully! You can now ask questions about their content.', 'bot');
+
+                    // Mark files as embedded
+                    filesToEmbed.forEach(file => {
+                        const fileId = generateFileId(file);
+                        fileStates[fileId].embedded = true;
+                    });
+
+                    // Fetch visual features status for embedded files
+                    const embeddedPaths = filesToEmbed.map(file => {
+                        const fileId = generateFileId(file);
+                        return fileStates[fileId].serverPath;
+                    }).filter(path => path);
+                    
+                    if (embeddedPaths.length > 0) {
+                        fetchVisualFeaturesStatus(embeddedPaths);
+                    }
+
+                    updateManageTab();
+                } else {
+                    showStatus(data.error || 'Embedding failed', 'error');
+                }
+            })
+            .catch(error => {
+                showStatus('Embedding failed: ' + error.message, 'error');
+            })
+            .finally(() => {
+                reembedAllBtn.disabled = false;
+                reprocessAllVisualBtn.disabled = false;
+                reembedAllBtn.textContent = '🔄 Reprocess All';
+                reprocessAllVisualBtn.textContent = '🖼️ Reprocess All + Visual';
+            });
+        }
+
+        function selectAllFiles() {
+            Object.keys(fileStates).forEach(fileId => {
+                fileStates[fileId].selected = true;
+            });
+            updateManageTab();
+            updateSendButtonState();
+        }
+
+        function deselectAllFiles() {
+            Object.keys(fileStates).forEach(fileId => {
+                fileStates[fileId].selected = false;
+            });
+            updateManageTab();
+            updateSendButtonState();
+        }
+
+        function updateFileList() {
+            fileList.innerHTML = '';
+            uploadedFiles.forEach((file, index) => {
+                const fileId = generateFileId(file);
+                const pages = fileStates[fileId]?.pages || 0;
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                // Show relative path for folder selections
+                const displayName = file.name;
+                fileItem.innerHTML = `
+                    <span>${displayName} (${(file.size / 1024 / 1024).toFixed(2)} MB, ${pages} pages)</span>
+                    <button onclick="removeFile(${index})">❌</button>
+                `;
+                fileList.appendChild(fileItem);
+            });
+        }
+
+        function removeFile(index) {
+            const removedFile = uploadedFiles[index];
+            const fileId = generateFileId(removedFile);
+
+            uploadedFiles.splice(index, 1);
+            delete fileStates[fileId];
+
+            updateFileList();
+            updateManageTab();
+
+        }
+
+        function uploadFiles(useVLM = false) {
+            if (uploadedFiles.length === 0 || isProcessing) return;
+
+            // Check for duplicates against previous session files and within current batch
+            const duplicateFiles = [];
+            const processedIds = new Set();
+            
+            const filesToUpload = uploadedFiles.filter((file, index) => {
+                const fileId = generateFileId(file);
+                
+                // Check if this file already exists in previous session files
+                const existsInPrevious = previousSessionFiles.some(prevFile => generateFileId(prevFile) === fileId);
+                
+                // Check if this file appears multiple times in the current batch
+                const isDuplicateInBatch = processedIds.has(fileId);
+                
+                if (existsInPrevious || isDuplicateInBatch) {
+                    duplicateFiles.push(file.name);
+                    return false;
+                }
+                
+                // Mark this file ID as processed
+                processedIds.add(fileId);
+                return true;
+            });
+
+            if (filesToUpload.length === 0) {
+                showStatus('All selected files are already processed. No new files to upload.', 'info');
+                isProcessing = false;
+                uploadButton.disabled = false;
+                uploadVisualButton.disabled = false;
+                uploadButton.textContent = '📤 Upload & Process';
+                uploadVisualButton.textContent = '🖼️ Upload & Process + Visual';
+                return;
+            }
+
+            isProcessing = true;
+            uploadButton.disabled = true;
+            uploadVisualButton.disabled = true;
+            const activeButton = useVLM ? uploadVisualButton : uploadButton;
+            activeButton.textContent = 'Uploading and Processing...';
+
+            let statusMessage = `Uploading and processing ${filesToUpload.length} file(s)...`;
+            if (duplicateFiles.length > 0) {
+                statusMessage += ` (${duplicateFiles.length} duplicate(s) skipped: ${duplicateFiles.join(', ')})`;
+            }
+            showStatus(statusMessage, 'info');
+
+            const formData = new FormData();
+            filesToUpload.forEach(file => {
+                // Use only the filename, not the full path for folder uploads
+                const filename = file.name.split('/').pop() || file.name;
+                formData.append('files', file, filename);
+            });
+
+            // Add VLM options
+            formData.append('enable_vlm', useVLM);
+            if (useVLM) {
+                formData.append('vlm_api_url', vlmApiUrlInput.value);
+                formData.append('vlm_model', vlmModelNameInput.value);
+            }
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    showStatus(data.message, 'success');
+                    messageInput.disabled = false;
+                    sendButton.disabled = false;
+                    addMessage('Assistant', 'Files processed successfully! You can now ask questions about their content.', 'bot');
+
+                    // Store server paths and mark uploaded files as embedded
+                    if (data.uploaded_files) {
+                        filesToUpload.forEach((file, index) => {
+                            const fileId = generateFileId(file);
+                            fileStates[fileId].serverPath = data.uploaded_files[index];
+                            fileStates[fileId].embedded = true;
+                        });
+                        
+                        // Fetch page counts for the uploaded files
+                        fetchPageCounts(data.uploaded_files);
+                        
+                        // Fetch visual features status for the uploaded files
+                        fetchVisualFeaturesStatus(data.uploaded_files);
+                        
+                        updateFileList(); // This will update the upload tab
+                    } else {
+                        // Fallback for old response format
+                        filesToUpload.forEach(file => {
+                            const fileId = generateFileId(file);
+                            fileStates[fileId].embedded = true;
+                        });
+                        
+                        updateFileList();
+                    }
+
+                    // Automatically save files
+                    previousSessionFiles = [...previousSessionFiles, ...uploadedFiles];
+                    uploadedFiles = [];
+                    updateFileList();
+                    saveUploadedFiles();
+                    updateManageTab();
+                } else {
+                    showStatus(data.error || 'Upload failed', 'error');
+                }
+            })
+            .catch(error => {
+                showStatus('Upload failed: ' + error.message, 'error');
+            })
+            .finally(() => {
+                isProcessing = false;
+                uploadButton.disabled = false;
+                uploadVisualButton.disabled = false;
+                uploadButton.textContent = '📤 Upload & Process';
+                uploadVisualButton.textContent = '🖼️ Upload & Process + Visual';
+            });
+        }
+
+        function showStatus(message, type) {
+            uploadStatus.textContent = message;
+            uploadStatus.className = `status ${type}`;
+            uploadStatus.style.display = 'block';
+            setTimeout(() => {
+                uploadStatus.style.display = 'none';
+            }, 5000);
+        }
+
+        // Chat functionality
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        clearChatBtn.addEventListener('click', clearChatHistory);
+
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            addMessage('You', message, 'user');
+            messageInput.value = '';
+            sendButton.disabled = true;
+            sendButton.textContent = 'Thinking...';
+
+            const apiUrl = apiUrlInput.value.trim() || 'http://localhost:1234/v1/chat/completions';
+            const model = modelNameInput.value.trim() || 'local-model';
+            
+            // Get selected files for chat
+            const selectedFiles = getSelectedFilePaths();
+
+            fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: message,
+                    api_url: apiUrl,
+                    model: model,
+                    selected_files: selectedFiles,
+                    chat_history: chatHistory
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.response) {
+                    if (typeof data.response === 'object' && data.response.answer) {
+                        addMessage('Assistant', data.response.answer, 'bot', data.response.sources);
+                    } else {
+                        // Fallback for old format
+                        addMessage('Assistant', data.response, 'bot');
+                    }
+                } else {
+                    addMessage('Assistant', 'Error: ' + (data.error || 'Unknown error'), 'bot');
+                }
+            })
+            .catch(error => {
+                addMessage('Assistant', 'Error: ' + error.message, 'bot');
+            })
+            .finally(() => {
+                sendButton.disabled = false;
+                sendButton.textContent = 'Send';
+            });
+        }
+
+        function addMessage(sender, text, type, sources = [], saveToHistory = true) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+
+            let messageHTML = `<strong>${sender}:</strong> ${marked.parse(text)}`;
+
+            // Add sources if available
+            if (sources && sources.length > 0) {
+                messageHTML += '<div class="message-sources">';
+                messageHTML += '<h4>Sources:</h4>';
+                sources.forEach((source, index) => {
+                    const sourceNumber = index + 1;
+                    let sourceText = `[${sourceNumber}] ${source.name}`;
+                    
+                    // Add line number information if available
+                    if (source.start_line && source.end_line) {
+                        if (source.start_line === source.end_line) {
+                            sourceText += ` (line ${source.start_line})`;
+                        } else {
+                            sourceText += ` (lines ${source.start_line}-${source.end_line})`;
+                        }
+                    }
+                    
+                    // Add context information if available
+                    if (source.context) {
+                        sourceText += ` - ${source.context}`;
+                    }
+                    
+                    // Add similarity and page info
+                    sourceText += ` (${source.page_count} pages, ${source.similarity_percent}% similarity)`;
+                    
+                    messageHTML += `<a href="${source.href}" target="_blank" class="source-link">${sourceText}</a>`;
+                });
+                messageHTML += '</div>';
+            }
+
+            messageDiv.innerHTML = messageHTML;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Add to history and save only if saveToHistory is true
+            if (saveToHistory) {
+                chatHistory.push({ sender, text, type, sources });
+                saveChatHistory();
+            }
+        }
+
+        function saveChatHistory() {
+            fetch('/save_chat_history', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ chat_history: chatHistory }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('Error saving chat history:', data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error saving chat history:', error);
+            });
+        }
+
+        function loadChatHistory() {
+            fetch('/load_chat_history')
+            .then(response => response.json())
+            .then(data => {
+                if (data.chat_history) {
+                    chatHistory = data.chat_history;
+                    chatHistory.forEach(msg => {
+                        addMessage(msg.sender, msg.text, msg.type, msg.sources, false);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error loading chat history:', error);
+            });
+        }
+
+        function clearChatHistory() {
+            if (confirm('Are you sure you want to clear all chat history? This cannot be undone.')) {
+                chatHistory = [];
+                saveChatHistory();
+                chatMessages.innerHTML = '';
+                addMessage('Assistant', 'Chat history cleared. Upload some files first, then ask me questions about their content!', 'bot');
+            }
+        }
+
+        function openFile(filePath) {
+            // For now, we'll just show an alert with the path
+            // In a real application, you might want to open the file in a PDF viewer
+            alert(`Opening file: ${filePath}`);
+        }
+
+        function saveUploadedFiles() {
+            // Save both current session files and previous session files
+            const allFilesData = [...uploadedFiles, ...previousSessionFiles].map(file => {
+                const fileId = generateFileId(file);
+                const normalizedName = file.name.split('/').pop() || file.name;
+                return {
+                    name: normalizedName,
+                    size: file.size,
+                    lastModified: file.lastModified,
+                    webkitRelativePath: normalizedName, // Save just the filename, not the full path
+                    serverPath: fileStates[fileId]?.serverPath,
+                    selected: fileStates[fileId]?.selected || false,
+                    embedded: fileStates[fileId]?.embedded || false,
+                    has_visual_features: fileStates[fileId]?.has_visual_features || false,
+                    pages: fileStates[fileId]?.pages || 0
+                };
+            });
+
+            fetch('/save_uploaded_files', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    uploaded_files: allFilesData
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    console.log('Files saved:', data.message);
+                    // Optionally show a brief status message
+                    // showStatus(data.message, 'success');
+                }
+            })
+            .catch(error => {
+                console.error('Error saving uploaded files:', error);
+            });
+        }
+
+        function autoSaveUploadedFiles() {
+            if (uploadedFiles.length > 0) {
+                saveUploadedFiles();
+            }
+        }
+
+        function loadUploadedFiles() {
+            fetch('/load_uploaded_files')
+            .then(response => response.json())
+            .then(data => {
+                if (data.uploaded_files && data.uploaded_files.length > 0) {
+                    // All loaded files become "previous session files"
+                    previousSessionFiles = data.uploaded_files.map(fileData => {
+                        // Create a mock file object
+                        const mockFile = {
+                            name: fileData.name,
+                            size: fileData.size,
+                            lastModified: fileData.lastModified,
+                            webkitRelativePath: fileData.webkitRelativePath || fileData.name, // Use saved path or fallback to name
+                            type: 'application/pdf'
+                        };
+                        
+                        // Restore file state - normalize path separators
+                        const fileId = generateFileId(mockFile);
+                        fileStates[fileId] = {
+                            selected: fileData.selected,
+                            embedded: fileData.embedded,
+                            has_visual_features: fileData.has_visual_features || false,
+                            pages: fileData.pages,
+                            serverPath: fileData.serverPath ? fileData.serverPath.replace(/\\/g, '/') : null,
+                            index: previousSessionFiles.length
+                        };
+                        
+                        return mockFile;
+                    });
+                    
+                    // Update manage tab to show previous session files
+                    updateManageTab();
+                    updateSendButtonState();
+                    
+                    // Fetch page counts for loaded files
+                    const serverPaths = previousSessionFiles.map(file => {
+                        const fileId = generateFileId(file);
+                        return fileStates[fileId].serverPath;
+                    }).filter(path => path);
+                    
+                    if (serverPaths.length > 0) {
+                        fetchPageCounts(serverPaths);
+                        fetchVisualFeaturesStatus(serverPaths);
+                    }
+                }
+            }).catch(error => {
+                console.error('Error loading uploaded files:', error);
+            });
+        }
+
+        function checkSourceLinks() {
+            const sourceLinks = document.querySelectorAll('.source-link');
+            sourceLinks.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href && href !== '#') {
+                    fetch('/file_exists', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ path: href }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.exists) {
+                            link.setAttribute('href', '#');
+                            link.classList.add('disabled');
+                            link.textContent += ' (file deleted)';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error checking file existence:', error);
+                    });
+                }
+            });
+        }
+
+        // Load uploaded files on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUploadedFiles();
+            loadChatHistory();
+            checkSourceLinks();
+        });
+
+        // Save uploaded files whenever they change
+        function fetchPageCounts(filePaths) {
+            fetch('/get_page_counts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    file_paths: filePaths
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.page_counts) {
+                    // Update fileStates with page counts
+                    Object.keys(fileStates).forEach(fileId => {
+                        const state = fileStates[fileId];
+                        if (state && state.serverPath && filePaths.includes(state.serverPath)) {
+                            state.pages = data.page_counts[state.serverPath] || 0;
+                        }
+                    });
+                    updateFileList(); // Refresh the upload tab with page counts
+                    updateManageTab(); // Refresh the manage tab with page counts
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching page counts:', error);
+            });
+        }
+
+        function fetchVisualFeaturesStatus(filePaths) {
+            fetch('/get_file_status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    file_paths: filePaths
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.file_statuses) {
+                    // Update fileStates with visual features status
+                    Object.keys(fileStates).forEach(fileId => {
+                        const state = fileStates[fileId];
+                        if (state && state.serverPath && filePaths.includes(state.serverPath)) {
+                            state.has_visual_features = data.file_statuses[state.serverPath]?.has_visual_features || false;
+                        }
+                    });
+                    updateFileList(); // Refresh the upload tab with visual features status
+                    updateManageTab(); // Refresh the manage tab with visual features status
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching visual features status:', error);
+            });
+        }
+    </script>
+</body>
+</html>
