@@ -1,29 +1,53 @@
+[![ArXiv](https://img.shields.io/badge/ArXiv-2512.16841-B31B1B?logo=arxiv&logoColor=white)](https://arxiv.org/abs/2512.16841)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-devmuniz-0A66C2?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/devmuniz)
+[![GitHub Profile](https://img.shields.io/badge/GitHub-devMuniz02-181717?logo=github&logoColor=white)](https://github.com/devMuniz02)
+[![Portfolio](https://img.shields.io/badge/Portfolio-devmuniz02.github.io-0F172A?logo=googlechrome&logoColor=white)](https://devmuniz02.github.io/)
+[![Hugging Face](https://img.shields.io/badge/Hugging%20Face-manu02-FFD21E?logoColor=black)](https://huggingface.co/manu02)
+
 # RAG Any File
 
 > RAG-Any-File is the ultimate repository to turn your messy folders, complex codebases, and hidden library docs into a private, searchable AI brain. Whether it's a 100-page PDF, a chaotic venv full of source code, or a screenshot of a diagram—if it's a file, this repo can "read" it, "index" it, and "chat" with it.
 
 > **Desktop App Available**: Run as a native desktop application using the provided executable, no browser required!
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![GitHub issues](https://img.shields.io/github/issues/devMuniz02/RAG-Any-File)](https://github.com/devMuniz02/RAG-Any-File/issues)
-[![GitHub stars](https://img.shields.io/github/stars/devMuniz02/RAG-Any-File)](https://github.com/devMuniz02/RAG-Any-File/stargazers)
+## Overview
 
-![Demo](assets/RAGAnyFile.gif)
+RAG-Any-File is the ultimate repository to turn your messy folders, complex codebases, and hidden library docs into a private, searchable AI brain. Whether it's a 100-page PDF, a chaotic venv full of source code, or a screenshot of a diagram—if it's a file, this repo can "read" it, "index" it, and "chat" with it.
 
-## 📋 Table of Contents
+## Repository Structure
 
-- [Features](#-features)
-- [Installation](#-installation)
-- [Getting Started](#-getting-started)
-- [Project Structure](#-project-structure)
-- [Usage](#-usage)
-- [Configuration](#-configuration)
-- [Cleanup](#-cleanup)
-- [Contributing](#-contributing)
-- [License](#-license)
-- [Contact](#-contact)
+| Path | Description |
+| --- | --- |
+| `assets/` | Images, figures, or other supporting media used by the project. |
+| `src/` | Primary source code for the application or library. |
+| `.gitignore` | Top-level file included in the repository. |
+| `cleanup.py` | Top-level file included in the repository. |
+| `desktop_app.py` | Top-level file included in the repository. |
+| `LICENSE` | Repository license information. |
+| `README.md` | Primary project documentation. |
+| `requirements.txt` | Python dependency specification for local setup. |
 
-## ✨ Features
+## Getting Started
+
+1. Clone the repository.
+
+   ```bash
+   git clone https://github.com/devMuniz02/RAG-Any-File.git
+   cd RAG-Any-File
+   ```
+
+2. Prepare the local environment.
+
+Install Python dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+3. Run or inspect the project entry point.
+
+Use the project-specific scripts or notebooks in the repository root to run the workflow.
+
+## Features
 
 - **File Upload & Processing**: Upload multiple files (PDF, DOCX, PPTX, XLSX, CSV, images) and automatically extract text for analysis
 - **Intelligent Chat**: Ask questions about your documents and get context-aware answers using RAG (Retrieval-Augmented Generation)
@@ -33,7 +57,7 @@
 - **Persistent Storage**: Uploaded files, processed data, and chat history are saved for future sessions
 - **Source Citations**: Answers include clickable links to relevant document sections
 
-## 🚀 Installation
+## Installation
 
 ### Prerequisites
 
@@ -54,44 +78,7 @@ cd RAG-Any-File
 pip install -r requirements.txt
 ```
 
-## 🚀 Getting Started
-
-After cloning this repository, follow these steps to set up and run the application:
-
-## 📁 Project Structure
-
-```
-RAG-Any-File/
-├── assets/                 # Static assets (images, icons, etc.)
-├── data/                   # Data files and datasets
-├── desktop_app.py          # Desktop application launcher
-├── docs/                   # Documentation files
-├── notebooks/              # Jupyter notebooks for analysis and prototyping
-├── scripts/                # Utility scripts and automation tools
-├── src/                    # Source code
-├── tests/                  # Unit tests and test files
-├── LICENSE                 # License file
-├── README.md               # Project documentation
-└── requirements.txt        # Python dependencies
-```
-
-### Directory Descriptions
-
-- **`assets/`**: Static assets (images, icons, etc.)
-- **`data/`**: Processed document data, FAISS index, and metadata
-- **`desktop_app.py`**: Script to launch the native desktop application
-- **`docs/`**: Documentation files
-- **`notebooks/`**: Jupyter notebooks for analysis and prototyping
-- **`scripts/`**: Utility scripts and automation tools
-- **`src/`**: Main source code (Flask app and RAG processor)
-- **`tests/`**: Unit tests and test files
-- **`uploads/`**: Uploaded files (created automatically)
-- **`LICENSE`**: MIT License file
-- **`README.md`**: Project documentation
-- **`requirements.txt`**: Python dependencies
-- **`cleanup.py`**: Script to clear all processed data and uploaded files
-
-## 📖 Usage
+## Usage
 
 ### Option 1: Desktop Application (Recommended)
 
@@ -138,7 +125,61 @@ The application will start on `http://localhost:8000`
 - **Source Citations**: Click on citation links in responses to view relevant document sections
 - **Cleanup**: Use `python cleanup.py` to clear all processed data and uploaded files
 
-## ⚙️ Configuration
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Table of Contents
+
+- [Features](#-features)
+- [Installation](#-installation)
+- [Getting Started](#-getting-started)
+- [Project Structure](#-project-structure)
+- [Usage](#-usage)
+- [Configuration](#-configuration)
+- [Cleanup](#-cleanup)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Contact](#-contact)
+
+## Getting Started
+
+After cloning this repository, follow these steps to set up and run the application:
+
+## Project Structure
+
+```
+RAG-Any-File/
+├── assets/                 # Static assets (images, icons, etc.)
+├── data/                   # Data files and datasets
+├── desktop_app.py          # Desktop application launcher
+├── docs/                   # Documentation files
+├── notebooks/              # Jupyter notebooks for analysis and prototyping
+├── scripts/                # Utility scripts and automation tools
+├── src/                    # Source code
+├── tests/                  # Unit tests and test files
+├── LICENSE                 # License file
+├── README.md               # Project documentation
+└── requirements.txt        # Python dependencies
+```
+
+### Directory Descriptions
+
+- **`assets/`**: Static assets (images, icons, etc.)
+- **`data/`**: Processed document data, FAISS index, and metadata
+- **`desktop_app.py`**: Script to launch the native desktop application
+- **`docs/`**: Documentation files
+- **`notebooks/`**: Jupyter notebooks for analysis and prototyping
+- **`scripts/`**: Utility scripts and automation tools
+- **`src/`**: Main source code (Flask app and RAG processor)
+- **`tests/`**: Unit tests and test files
+- **`uploads/`**: Uploaded files (created automatically)
+- **`LICENSE`**: MIT License file
+- **`README.md`**: Project documentation
+- **`requirements.txt`**: Python dependencies
+- **`cleanup.py`**: Script to clear all processed data and uploaded files
+
+## ️ Configuration
 
 ### Environment Variables
 
@@ -165,59 +206,3 @@ LOCAL_MODEL=local-model
 - **Supported Formats**: PDF, DOCX, PPTX, XLSX, CSV, and image files (JPG, PNG, etc.)
 - **Chunk Size**: 1000 characters with 200 character overlap for text processing
 - **Embedding Model**: Uses `all-MiniLM-L6-v2` for document embeddings
-
-## � Cleanup
-
-To clear all processed data and uploaded files:
-
-```bash
-python cleanup.py
-```
-
-This will remove:
-- FAISS index and document embeddings
-- Processed document metadata
-- All uploaded files
-
-**Warning**: This action cannot be undone. Use with caution.
-
-## �🤝 Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-### Development Setup
-
-```bash
-# Install development dependencies (if available)
-pip install -r requirements.txt
-
-# Run the application in development mode
-cd src
-python app.py
-
-# For testing file processing
-# Place test files in the uploads/ directory
-```
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 📞 Contact
-
-- **GitHub:** [https://github.com/devMuniz02/](https://github.com/devMuniz02/)
-- **LinkedIn:** [https://www.linkedin.com/in/devmuniz](https://www.linkedin.com/in/devmuniz)
-- **Hugging Face:** [https://huggingface.co/manu02](https://huggingface.co/manu02)
-- **Portfolio:** [https://devmuniz02.github.io/](https://devmuniz02.github.io/)
-
-Project Link: [https://github.com/devMuniz02/RAG-Any-File](https://github.com/devMuniz02/RAG-Any-File)
-
----
-
-⭐ If you find this project helpful, please give it a star!
